@@ -1,0 +1,11 @@
+website: https://ikman.lk/en/ads/sri-lanka/vehicles?sort=relevance&buy_now=0&urgent=1&page=1&query=, https://riyasewana.com/search
+playStore: https://play.google.com/store/games?device=phone&hl=en&gl=US
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scraper
+    username: postgres
+    password: 123456
