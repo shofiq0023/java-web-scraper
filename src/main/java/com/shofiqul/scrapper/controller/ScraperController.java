@@ -2,6 +2,7 @@ package com.shofiqul.scrapper.controller;
 
 import com.shofiqul.scrapper.model.PlayStoreDto;
 import com.shofiqul.scrapper.model.ResponseDto;
+import com.shofiqul.scrapper.service.FileService;
 import com.shofiqul.scrapper.service.ScraperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ScraperController {
 	private final ScraperService scraperService;
+	private final FileService fileService;
 
 	@GetMapping("/{model}")
 	public Set<ResponseDto> getVehicleByModel(@PathVariable("model") String vehicleModel) {
@@ -27,4 +29,8 @@ public class ScraperController {
 		return scraperService.getPlayStoreData();
 	}
 
+	@GetMapping("/file")
+	public boolean fileTest() {
+		return fileService.fileTest();
+	}
 }
