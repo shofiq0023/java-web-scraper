@@ -1,6 +1,7 @@
 package com.shofiqul.scrapper.service;
 
-public interface FileService {
+import com.shofiqul.scrapper.model.PlayStoreIconsEntity;
 
-    boolean fileTest();
+public interface FileService {
+    boolean createWebpFile(PlayStoreIconsEntity entity);
 }

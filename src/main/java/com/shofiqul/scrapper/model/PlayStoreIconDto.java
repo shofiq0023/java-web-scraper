@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class PlayStoreDto {
+public class PlayStoreIconDto {
 	private String sectionTitle;
-	private Set<ApplicationItems> items;
+	private Set<IconInformation> items;
 }

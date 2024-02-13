@@ -1,13 +1,12 @@
 package com.shofiqul.scrapper.serviceimpl;
 
-import com.shofiqul.scrapper.model.ApplicationItems;
-import com.shofiqul.scrapper.model.PlayStoreApplicationModel;
-import com.shofiqul.scrapper.model.PlayStoreDto;
-import com.shofiqul.scrapper.model.ResponseDto;
-import com.shofiqul.scrapper.repo.PlayStoreApplicationRepo;
+import com.shofiqul.scrapper.model.IconInformation;
+import com.shofiqul.scrapper.model.PlayStoreIconsEntity;
+import com.shofiqul.scrapper.model.PlayStoreIconDto;
+import com.shofiqul.scrapper.repo.PlayStoreIconsRepo;
+import com.shofiqul.scrapper.service.FileService;
 import com.shofiqul.scrapper.service.ScraperService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,65 +16,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ScraperServiceImpl implements ScraperService {
-	@Value("#{'${website}'.split(',')}")
-	List<String> urls;
-
 	@Value("${playStore}")
 	String playStoreUrl;
 
-	private final PlayStoreApplicationRepo repo;
+	private final PlayStoreIconsRepo repo;
+	private final FileService fileService;
 
 	@Override
-	public Set<ResponseDto> getVehicleByModel(String vehicleModel) {
-		Set<ResponseDto> response = new HashSet<ResponseDto>();
-
-		for (String url : urls) {
-			if (url.contains("ikman")) {
-				System.out.println(url + vehicleModel);
-				extractDataFromIkman(response, url + vehicleModel);
-			}
-		}
-		return response;
-	}
-
-	private void extractDataFromIkman(Set<ResponseDto> dtos, String url) {
-		try {
-			Document doc = Jsoup.connect(url).get();
-			Element element = doc.getElementsByClass("list--3NxGO").first();
-			Elements elements = element.getElementsByTag("a");
-
-			for (Element ads : elements) {
-				ResponseDto dto = new ResponseDto();
-
-				if (StringUtils.isNotEmpty(ads.attr("href"))) {
-					dto.setTitle(ads.attr("title"));
-					dto.setUrl("https://ikman.lk" + ads.attr("href"));
-				}
-
-				if (dto.getUrl() != null) {
-					dtos.add(dto);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public PlayStoreDto getPlayStoreData() {
-		PlayStoreDto response = new PlayStoreDto();
+	public PlayStoreIconDto getPlayStoreData() {
+		PlayStoreIconDto response = new PlayStoreIconDto();
 		extractPlayStoreData(response, playStoreUrl);
 
 		if (response.getItems().size() > 0) {
-			Set<PlayStoreApplicationModel> datas = new HashSet<PlayStoreApplicationModel>();
-			for (ApplicationItems item : response.getItems()) {
-				datas.add(copyProperties(item, PlayStoreApplicationModel.class));
+			Set<PlayStoreIconsEntity> datas = new HashSet<PlayStoreIconsEntity>();
+			for (IconInformation item : response.getItems()) {
+				datas.add(copyProperties(item, PlayStoreIconsEntity.class));
 			}
 
 			repo.saveAll(datas);
@@ -84,12 +44,13 @@ public class ScraperServiceImpl implements ScraperService {
 		return response;
 	}
 
-	private void extractPlayStoreData(PlayStoreDto response, String url) {
+	private void extractPlayStoreData(PlayStoreIconDto response, String url) {
 		try {
+			// Get the full html document
 			Document doc = Jsoup.connect(url).get();
 			Element section = doc.getElementsByTag("section").first();
 
-			Set<ApplicationItems> appSet = new HashSet<ApplicationItems>();
+			Set<IconInformation> appSet = new HashSet<IconInformation>();
 			Element header = section.getElementsByClass("oVnAB").first();
 
 			// Set the Heading title
@@ -105,12 +66,12 @@ public class ScraperServiceImpl implements ScraperService {
 				Elements list = scrollList.getElementsByClass("ULeU3b neq64b");
 
 				for (Element listItem : list) {
-					ApplicationItems app = new ApplicationItems();
+					IconInformation app = new IconInformation();
 					Element image = listItem.getElementsByTag("img").first();
 
 					// Set the app image
 					if (image != null) {
-						app.setImage(image.attr("src"));
+						app.setImageUrl(image.attr("src"));
 					}
 
 					// Set the app title
@@ -153,5 +114,20 @@ public class ScraperServiceImpl implements ScraperService {
 		}
 
 		return classInstance;
+	}
+
+	@Override
+	public boolean createFilesFromData() {
+		Set<PlayStoreIconsEntity> entities = new HashSet<PlayStoreIconsEntity>(repo.findAll());
+
+		if (entities.size() > 0) {
+			for(PlayStoreIconsEntity entity : entities) {
+				fileService.createWebpFile(entity);
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 }

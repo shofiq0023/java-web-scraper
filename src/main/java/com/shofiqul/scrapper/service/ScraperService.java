@@ -1,12 +1,9 @@
 package com.shofiqul.scrapper.service;
 
-import com.shofiqul.scrapper.model.PlayStoreDto;
-import com.shofiqul.scrapper.model.ResponseDto;
-
-import java.util.Set;
+import com.shofiqul.scrapper.model.PlayStoreIconDto;
 
 public interface ScraperService {
-    public Set<ResponseDto> getVehicleByModel(String vehicalModel);
+    PlayStoreIconDto getPlayStoreData();
 
-    PlayStoreDto getPlayStoreData();
+    boolean createFilesFromData();
 }

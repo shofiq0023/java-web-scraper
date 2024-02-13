@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "app_info")
+@Table(name = "playstore_icons")
 @Data
-public class PlayStoreApplicationModel {
+public class PlayStoreIconsEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	private String image;
+	private String imageUrl;
 	private String title;
 	private String rating;
 }
